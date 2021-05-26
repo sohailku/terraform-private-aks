@@ -52,3 +52,8 @@ variable "network_service_cidr" {
   description = "CNI service cidr"
   default     = "10.2.0.0/24"
 }
+
+variable "subscription_id" {}
+variable "tenant_id_PROD" {}
+variable "client_id" {}
+variable "client_secret" {}
