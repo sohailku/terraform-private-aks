@@ -1,6 +1,6 @@
 variable "location" {
   description = "The resource group location"
-  default     = "West Europe"
+  default     = "UAE NORTH"
 }
 
 variable "vnet_resource_group_name" {
@@ -18,10 +18,10 @@ variable "kube_vnet_name" {
   default     = "spoke1-kubevnet"
 }
 
-variable "kube_version_prefix" {
-  description = "AKS Kubernetes version prefix. Formatted '[Major].[Minor]' like '1.18'. Patch version part (as in '[Major].[Minor].[Patch]') will be set to latest automatically."
-  default     = "1.18"
-}
+# variable "kube_version_prefix" {
+ # description = "AKS Kubernetes version prefix. Formatted '[Major].[Minor]' like '1.18'. Patch version part (as in '[Major].[Minor].[Patch]') will be set to latest automatically."
+ # default     = "1.18"
+# }
 
 variable "kube_resource_group_name" {
   description = "The resource group name to be created"
@@ -35,7 +35,8 @@ variable "nodepool_nodes_count" {
 
 variable "nodepool_vm_size" {
   description = "Default nodepool VM size"
-  default     = "Standard_D2_v2"
+  default     = "Standard_DS5_v2"
+  #default     = "Standard_d2_v2"
 }
 
 variable "network_docker_bridge_cidr" {
@@ -53,7 +54,7 @@ variable "network_service_cidr" {
   default     = "10.2.0.0/24"
 }
 
-variable "subscription_id" {}
-variable "tenant_id_PROD" {}
-variable "client_id" {}
-variable "client_secret" {}
+#variable "subscription_id" {}
+#variable "tenant_id" {}
+#variable "client_id" {}
+#variable "client_secret" {}
