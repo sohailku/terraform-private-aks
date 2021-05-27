@@ -1,11 +1,23 @@
-terraform {
-  required_version = ">= 0.12"
-}
+#terraform {
+#  required_version = ">= 0.12"
+#}
 
-provider "azurerm" {
-  version = "~>2.5" //outbound_type https://github.com/terraform-providers/terraform-provider-azurerm/blob/v2.5.0/CHANGELOG.md
-  features {}
+
+terraform {
+  required_providers {
+    azurerm = {
+      source  = "hashicorp/azurerm"
+      version = "=2.8.0"
+    }
+  }
 }
+provider "azurerm" {
+  features {}
+  subscription_id = "74bc1dc1-df68-42a0-ab76-dc992dc1ac01"
+  client_id       = "0b275488-2c10-4319-a7c4-ecd553847919"
+  client_secret   = "2sqcqSVMC831V-YSo_P1J0g.KPZZD-R2a7"
+  tenant_id       = "ef3863ab-189d-4ed9-93eb-a5f0d7edf407"
+ }
 
 resource "azurerm_resource_group" "vnet" {
   name     = var.vnet_resource_group_name
@@ -80,53 +92,57 @@ module "routetable" {
   subnet_id          = module.kube_network.subnet_ids["aks-subnet"]
 }
 
-data "azurerm_kubernetes_service_versions" "current" {
-  location       = var.location
-  version_prefix = var.kube_version_prefix
-}
+# data "azurerm_kubernetes_service_versions" "current" {
+ # location       = var.location
+ # version_prefix = var.kube_version_prefix
+# }
 
-resource "azurerm_kubernetes_cluster" "privateaks" {
-  name                    = "private-aks"
-  location                = var.location
-  kubernetes_version      = data.azurerm_kubernetes_service_versions.current.latest_version
-  resource_group_name     = azurerm_resource_group.kube.name
-  dns_prefix              = "private-aks"
-  private_cluster_enabled = true
+#resource "azurerm_kubernetes_cluster" "privateaks" {
+#  name                    = "private-aks"
+#  location                = var.location
+#  kubernetes_version      = data.azurerm_kubernetes_service_versions.current.latest_version
+#  resource_group_name     = azurerm_resource_group.kube.name
+#  dns_prefix              = "private-aks"
+#  private_cluster_enabled = true
 
-  default_node_pool {
-    name           = "default"
-    node_count     = var.nodepool_nodes_count
-    vm_size        = var.nodepool_vm_size
-    vnet_subnet_id = module.kube_network.subnet_ids["aks-subnet"]
-  }
+#  default_node_pool {
+#    name           = "default"
+#    node_count     = var.nodepool_nodes_count
+#    vm_size        = var.nodepool_vm_size
+#    enable_auto_scaling = "true"
+#    os_disk_size_gb = 80
+#    max_count = 17
+#    min_count = 3
+#    vnet_subnet_id = module.kube_network.subnet_ids["aks-subnet"]
+ # }
 
-  identity {
-    type = "SystemAssigned"
-  }
+#  identity {
+#    type = "SystemAssigned"
+#  }
 
-  network_profile {
-    docker_bridge_cidr = var.network_docker_bridge_cidr
-    dns_service_ip     = var.network_dns_service_ip
-    network_plugin     = "azure"
-    outbound_type      = "userDefinedRouting"
-    service_cidr       = var.network_service_cidr
-  }
+ # network_profile {
+  #  docker_bridge_cidr = var.network_docker_bridge_cidr
+  #  dns_service_ip     = var.network_dns_service_ip
+  #  network_plugin     = "azure"
+   # outbound_type      = "userDefinedRouting"
+  #  service_cidr       = var.network_service_cidr
+  #}
 
-  depends_on = [module.routetable]
-}
+  # depends_on = [module.routetable]
+# }
 
-resource "azurerm_role_assignment" "netcontributor" {
-  role_definition_name = "Network Contributor"
-  scope                = module.kube_network.subnet_ids["aks-subnet"]
-  principal_id         = azurerm_kubernetes_cluster.privateaks.identity[0].principal_id
-}
+# resource "azurerm_role_assignment" "netcontributor" {
+ # role_definition_name = "Network Contributor"
+ # scope                = module.kube_network.subnet_ids["aks-subnet"]
+ # principal_id         = azurerm_kubernetes_cluster.privateaks.identity[0].principal_id
+# }
 
-module "jumpbox" {
-  source                  = "./modules/jumpbox"
-  location                = var.location
-  resource_group          = azurerm_resource_group.vnet.name
-  vnet_id                 = module.hub_network.vnet_id
-  subnet_id               = module.hub_network.subnet_ids["jumpbox-subnet"]
-  dns_zone_name           = join(".", slice(split(".", azurerm_kubernetes_cluster.privateaks.private_fqdn), 1, length(split(".", azurerm_kubernetes_cluster.privateaks.private_fqdn))))
-  dns_zone_resource_group = azurerm_kubernetes_cluster.privateaks.node_resource_group
-}
+# module "jumpbox" {
+#  source                  = "./modules/jumpbox"
+#  location                = var.location
+#  resource_group          = azurerm_resource_group.vnet.name
+#  vnet_id                 = module.hub_network.vnet_id
+#  subnet_id               = module.hub_network.subnet_ids["jumpbox-subnet"]
+#  dns_zone_name           = join(".", slice(split(".", azurerm_kubernetes_cluster.privateaks.private_fqdn), 1, length(split(".", azurerm_kubernetes_cluster.privateaks.private_fqdn))))
+#  dns_zone_resource_group = azurerm_kubernetes_cluster.privateaks.node_resource_group
+# }
